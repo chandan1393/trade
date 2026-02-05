@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Trading Dashboard</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<style>
+		body {
+			margin: 0;
+			font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+			background: #f4f6fb;
+			color: #333;
+		}
+
+		.header {
+			background: linear-gradient(135deg, #1e3c72, #2a5298);
+			color: #fff;
+			padding: 18px 24px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.header h2 {
+			margin: 0;
+			font-size: 22px;
+		}
+
+		.mode-badge {
+			padding: 6px 12px;
+			border-radius: 20px;
+			font-size: 12px;
+			font-weight: bold;
+			background: #ffcc00;
+			color: #000;
+		}
+
+		.container {
+			padding: 24px;
+			max-width: 1100px;
+			margin: auto;
+		}
+
+		.cards {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 20px;
+		}
+
+		.card {
+			background: #fff;
+			padding: 20px;
+			border-radius: 14px;
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+		}
+
+		.card h3 {
+			margin: 0 0 10px 0;
+			font-size: 14px;
+			color: #666;
+			font-weight: normal;
+		}
+
+		.card .value {
+			font-size: 26px;
+			font-weight: bold;
+			color: #1e3c72;
+		}
+
+		.status {
+			display: inline-block;
+			margin-top: 6px;
+			padding: 4px 10px;
+			border-radius: 14px;
+			font-size: 12px;
+			font-weight: bold;
+		}
+
+		.status.green {
+			background: #e6f7ed;
+			color: #0f8a42;
+		}
+
+		.status.red {
+			background: #ffe6e6;
+			color: #c62828;
+		}
+
+		.actions {
+			margin-top: 30px;
+			display: flex;
+			gap: 15px;
+			flex-wrap: wrap;
+		}
+
+		.btn {
+			padding: 12px 18px;
+			border-radius: 10px;
+			text-decoration: none;
+			font-weight: 600;
+			font-size: 14px;
+			display: inline-block;
+			transition: transform 0.15s ease, box-shadow 0.15s ease;
+		}
+
+		.btn.primary {
+			background: linear-gradient(135deg, #1e3c72, #2a5298);
+			color: #fff;
+		}
+
+		.btn.secondary {
+			background: #fff;
+			color: #1e3c72;
+			border: 1px solid #1e3c72;
+		}
+
+		.btn:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+		}
+
+		.footer {
+			margin-top: 40px;
+			text-align: center;
+			font-size: 12px;
+			color: #888;
+		}
+	</style>
+</head>
+
+<body>
+
+	<!-- HEADER -->
+	<div class="header">
+		<h2>Trading Dashboard</h2>
+		<span class="mode-badge" th:text="${tradingMode != null ? tradingMode : 'LIVE'}">
+			LIVE
+		</span>
+	</div>
+
+	<!-- CONTENT -->
+	<div class="container">
+
+		<div class="cards">
+
+			<!-- Market Status -->
+			<div class="card">
+				<h3>Market Status</h3>
+				<div class="value" th:text="${marketStatus}">OPEN</div>
+				<span class="status" th:classappend="${marketStatus == 'OPEN'} ? ' green' : ' red'">
+					<span th:text="${marketStatus == 'OPEN'} ? 'Running' : 'Closed'"></span>
+				</span>
+			</div>
+
+			<!-- WebSocket -->
+			<div class="card">
+				<h3>WebSocket</h3>
+				<div class="value" th:text="${wsStatus}">CONNECTED</div>
+				<span class="status" th:classappend="${wsStatus == 'CONNECTED'} ? ' green' : ' red'">
+					<span th:text="${wsStatus == 'CONNECTED'} ? 'Healthy' : 'Disconnected'"></span>
+				</span>
+			</div>
+
+			<!-- Open Trades -->
+			<div class="card">
+				<h3>Open Trades</h3>
+				<div class="value" th:text="${openTrades}">0</div>
+				<span class="status green">Active</span>
+			</div>
+
+		</div>
+
+		<!-- ACTIONS -->
+		<div class="actions">
+			<a href="/positions/stocks" class="btn primary">
+				📈 Stock Positions
+			</a>
+
+			<a href="/positions/index" class="btn primary">
+				📊 Index Positions
+			</a>
+
+			<a href="/oi/nifty" class="btn primary">
+				📊 Nifty OI
+			</a>
+			<a href="/oi/stock-oi" class="btn primary">
+				📊 Stock OI
+			</a>
+			<a href="/ui/logout" class="btn secondary">
+				Logout
+			</a>
+		</div>
+
+
+		<div class="footer">
+			⚠️ Live trading environment — actions affect real positions
+		</div>
+
+	</div>
+
+</body>
+
+</html>

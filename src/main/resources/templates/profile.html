@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Page</title>
+    <!-- Add FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="/css/main.css" rel="stylesheet">
+    
+</head>
+<body>
+	
+	
+	<div th:replace="~{fragments/sidebar :: sidebar}"></div>
+	
+    <div class="profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+           <!-- <img th:src="${profile.image}" alt="Profile Image">-->
+            <h1 th:text="${profile.fyId}"></h1>
+            <p th:text="${profile.emailId}"></p>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="profile-details">
+            <div class="detail">
+                <h3>Email ID</h3>
+                <p th:text="${profile.emailId}"></p>
+            </div>
+            <div class="detail">
+                <h3>Name</h3>
+                <p th:text="${profile.name}"></p>
+            </div>
+            <div class="detail">
+                <h3>Mobile Number</h3>
+                <p th:text="${profile.mobileNumber}"></p>
+            </div>
+            <div class="detail">
+                <h3>PAN</h3>
+                <p th:text="${profile.pan}"></p>
+            </div>
+            <div class="detail">
+                <h3>Password Change Date</h3>
+                <p th:text="${profile.pwdChangeDate}"></p>
+            </div>
+            <div class="detail">
+                <h3>PIN Change Date</h3>
+                <p th:text="${profile.pinChangeDate}"></p>
+            </div>
+            <div class="detail">
+                <h3>Password Expiry</h3>
+                <p th:text="${profile.pwdToExpire} + ' days'"></p>
+            </div>
+            <div class="detail">
+                <h3>TOTP Enabled</h3>
+                <p th:text="${profile.totp} ? 'Yes' : 'No'"></p>
+            </div>
+            <div class="detail">
+                <h3>DDPI Enabled</h3>
+                <p th:text="${profile.ddpiEnabled} ? 'Yes' : 'No'"></p>
+            </div>
+            <div class="detail">
+                <h3>MTF Enabled</h3>
+                <p th:text="${profile.mtfEnabled} ? 'Yes' : 'No'"></p>
+            </div>
+            <div class="detail">
+                <h3>FY ID</h3>
+                <p th:text="${profile.fyId}"></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

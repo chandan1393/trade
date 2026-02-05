@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>NIFTY OI Dashboard</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Inter, "Segoe UI", Arial;
+            background: #f2f4f8;
+            color: #111827;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #0f172a, #020617);
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .oi-btn {
+            padding: 8px 14px;
+            border: none;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 16px;
+            border-radius: 14px;
+            box-shadow: 0 4px 14px rgba(0,0,0,.06);
+        }
+
+        .card h4 {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .value {
+            font-size: 28px;
+            font-weight: 800;
+            margin-top: 6px;
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .bullish { background:#e7f7ee;color:#047857 }
+        .bearish { background:#fee2e2;color:#b91c1c }
+        .range { background:#fef3c7;color:#92400e }
+
+        .signal { font-size:22px;font-weight:800 }
+        .sell { color:#b91c1c }
+        .buy { color:#047857 }
+        .wait { color:#92400e }
+
+        /* CHART */
+        .chart-card {
+            background:#fff;
+            padding:16px;
+            border-radius:14px;
+            box-shadow:0 4px 14px rgba(0,0,0,.06);
+            margin-bottom:22px;
+        }
+
+        /* TABLE */
+        table {
+            width:100%;
+            border-collapse:separate;
+            border-spacing:0;
+            background:#fff;
+            border-radius:14px;
+            overflow:hidden;
+            box-shadow:0 2px 12px rgba(0,0,0,.06);
+        }
+
+        th {
+            background:#f3f4f6;
+            font-size:12px;
+            font-weight:700;
+            text-transform:uppercase;
+            padding:12px;
+        }
+
+        td {
+            padding:12px;
+            font-size:13px;
+            text-align:center;
+            border-bottom:1px solid #f1f5f9;
+        }
+
+        tbody tr:nth-child(even){background:#fafafa}
+        tbody tr:hover{background:#f1f5f9}
+
+        .atm {
+            background:#fff7ed !important;
+            border-left:4px solid #f97316;
+        }
+
+        .call { color:#2563eb;font-weight:700 }
+        .put { color:#059669;font-weight:700 }
+
+        /* MODAL */
+        .oi-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .oi-modal-content {
+            position: relative;
+            width: 95%;
+            height: 95%;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .oi-close {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            z-index: 10000;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .oi-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>NIFTY OI Dashboard</h2>
+    <div>
+        LTP: <b id="ltp">--</b>
+        <button id="oiBtn" class="oi-btn">📊 OI Command Center</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- CARDS -->
+    <div class="cards">
+        <div class="card"><h4>PCR</h4><div class="value" id="pcr">--</div></div>
+        <div class="card"><h4>Bias</h4><span class="badge" id="bias">--</span></div>
+        <div class="card"><h4>Support</h4><div class="value buy" id="support">--</div></div>
+        <div class="card"><h4>Resistance</h4><div class="value sell" id="resistance">--</div></div>
+        <div class="card"><h4>Trade Signal</h4><div class="signal wait" id="signal">WAIT</div></div>
+    </div>
+
+    <!-- CHART -->
+    <div class="chart-card">
+        <h4>OI Wall</h4>
+        <canvas id="oiChart" height="120"></canvas>
+    </div>
+
+    <!-- TABLE -->
+    <table>
+        <thead>
+        <tr>
+            <th>Strike</th>
+            <th>Call OI</th>
+            <th>Put OI</th>
+            <th>Δ Call</th>
+            <th>Δ Put</th>
+        </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+    </table>
+
+</div>
+
+<!-- MODAL -->
+<div id="oiModal" class="oi-modal">
+    <div class="oi-modal-content">
+        <span class="oi-close" onclick="closeOiModal()">✖</span>
+        <iframe src="/oi/nifty-oi" class="oi-iframe"></iframe>
+    </div>
+</div>
+
+<script>
+let oiChart;
+
+// DOM refs
+const ltpEl = document.getElementById('ltp');
+const pcr = document.getElementById('pcr');
+const bias = document.getElementById('bias');
+const support = document.getElementById('support');
+const resistance = document.getElementById('resistance');
+const signal = document.getElementById('signal');
+const rows = document.getElementById('rows');
+const oiChartCtx = document.getElementById('oiChart');
+
+// MODAL EVENTS
+document.getElementById("oiBtn").addEventListener("click", openOiModal);
+
+function openOiModal() {
+    document.getElementById("oiModal").style.display = "flex";
+}
+function closeOiModal() {
+    document.getElementById("oiModal").style.display = "none";
+}
+
+// DATA REFRESH
+async function refresh() {
+    const res = await fetch('/api/oi/nifty/snapshot?range=500');
+    const d = await res.json();
+
+    const ltp = d.summary.niftyLtp;
+    const atm = Math.round(ltp / 50) * 50;
+
+    ltpEl.innerText = ltp.toFixed(2);
+    pcr.innerText = d.summary.pcr.toFixed(2);
+
+    bias.innerText = d.summary.bias;
+    bias.className = 'badge ' +
+        (d.summary.bias.startsWith("BULLISH") ? "bullish" :
+         d.summary.bias.startsWith("BEARISH") ? "bearish" : "range");
+
+    support.innerText = d.support;
+    resistance.innerText = d.resistance;
+
+    signal.innerText =
+        d.summary.pcr < 0.9 ? "SELL ON RISE" :
+        d.summary.pcr > 1.1 ? "BUY ON DIP" : "WAIT";
+
+    signal.className =
+        "signal " +
+        (d.summary.pcr < 0.9 ? "sell" :
+         d.summary.pcr > 1.1 ? "buy" : "wait");
+
+    renderChart(d.strikes);
+
+    rows.innerHTML = '';
+    d.strikes.forEach(r => {
+        const tr = document.createElement('tr');
+        if (r.strike === atm) tr.classList.add("atm");
+
+        tr.innerHTML = `
+            <td>${r.strike}</td>
+            <td class="call">${r.callOi}</td>
+            <td class="put">${r.putOi}</td>
+            <td>${r.callChgOi}</td>
+            <td>${r.putChgOi}</td>
+        `;
+        rows.appendChild(tr);
+    });
+}
+
+function renderChart(strikes) {
+    if (oiChart) oiChart.destroy();
+    oiChart = new Chart(oiChartCtx, {
+        type: 'bar',
+        data: {
+            labels: strikes.map(s => s.strike),
+            datasets: [
+                { label: 'Call OI', data: strikes.map(s => s.callOi), backgroundColor: '#3b82f6' },
+                { label: 'Put OI', data: strikes.map(s => s.putOi), backgroundColor: '#10b981' }
+            ]
+        },
+        options: { responsive: true }
+    });
+}
+
+setInterval(refresh, 3000);
+refresh();
+</script>
+
+</body>
+</html>

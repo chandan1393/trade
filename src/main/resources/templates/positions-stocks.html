@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Stock Option Positions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            background: #f4f6fb;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            padding: 24px;
+            max-width: 1300px;
+            margin: auto;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        thead {
+            background: #f0f2f8;
+        }
+
+        th, td {
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        th {
+            font-weight: 600;
+            color: #555;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        tbody tr:hover {
+            background: #eef3ff;
+        }
+
+        td.symbol {
+            text-align: left;
+            font-weight: 600;
+            color: #1e3c72;
+        }
+
+        input[type="number"] {
+            width: 85px;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            background: #dce3ff;
+            color: #1e3c72;
+        }
+
+        .loss {
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .profit {
+            color: #0f8a42;
+            font-weight: bold;
+        }
+
+        /* Leg Styling */
+        .leg-row {
+            background: #f4f7ff !important;
+            font-size: 13px;
+        }
+
+        .leg-row td {
+            padding: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>Stock Option Positions</h2>
+    <span class="badge" th:text="${tradingMode}">LIVE</span>
+</div>
+
+<div class="container">
+
+    <div class="table-wrapper">
+        <table>
+
+            <thead>
+            <tr>
+                <th>Stock</th>
+                <th>Symbol</th>
+                <th>Entry</th>
+                <th>SL</th>
+                <th>T1</th>
+                <th>T2</th>
+                <th>T3</th>
+                <th>Qty</th>
+                <th>LTP</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <!-- ================= TRADE LOOP ================= -->
+            <th:block th:each="t : ${trades}">
+
+                <!-- MAIN TRADE ROW -->
+                <tr>
+
+                    <form method="post" action="/positions/update">
+
+                        <td class="symbol">
+                            <span th:text="${t.underlying}"></span>
+                            <span class="badge">STOCK</span>
+                        </td>
+
+                        <td th:text="${t.symbol}"></td>
+                        <td th:text="${t.entryPrice}"></td>
+
+                        <td>
+                            <input type="number" step="0.05"
+                                   name="sl"
+                                   th:value="${t.structureSL}"
+                                   th:disabled="${tradingMode == 'READ_ONLY'}"/>
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.05"
+                                   name="t1"
+                                   th:value="${t.t1}"
+                                   th:disabled="${tradingMode == 'READ_ONLY'}"/>
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.05"
+                                   name="t2"
+                                   th:value="${t.t2}"/>
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.05"
+                                   name="t3"
+                                   th:value="${t.t3}"/>
+                        </td>
+
+                        <td th:text="${t.totalQuantity}"></td>
+
+                        <td class="ltp"
+                            th:attr="data-symbol=${t.symbol}, data-entry=${t.entryPrice}">
+                            --
+                        </td>
+
+                        <td>
+                            <input type="hidden"
+                                   name="tradeId"
+                                   th:value="${t.tradeId}"/>
+                            <input type="hidden" name="type" value="STOCK"/>
+
+                            <button class="btn"
+                                    th:disabled="${tradingMode == 'READ_ONLY'}">
+                                Update
+                            </button>
+                        </td>
+
+                    </form>
+
+                </tr>
+
+                <!-- ================= LEGS ================= -->
+                <tr th:each="leg : ${t.stockLegs}"
+                    class="leg-row">
+
+                    <td colspan="3" style="text-align:left; padding-left:40px;">
+                        ➤ Leg <span th:text="${leg.legNo}"></span>
+                    </td>
+
+                    <td colspan="2">
+                        Qty: <b th:text="${leg.quantity}"></b>
+                    </td>
+
+                    <td colspan="2">
+                        Target: <b th:text="${leg.target}"></b>
+                    </td>
+
+                    <td>
+                        Status:
+                        <span th:text="${leg.status}"
+                              th:classappend="${leg.status == 'EXITED'} ? 'loss' : 'profit'">
+                        </span>
+                    </td>
+
+                    <td colspan="2"></td>
+
+                </tr>
+
+            </th:block>
+
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+
+<script>
+    async function refreshLtp() {
+        try {
+            const res = await fetch('/api/ltp');
+            const data = await res.json();
+
+            document.querySelectorAll('.ltp').forEach(td => {
+                const symbol = td.dataset.symbol;
+                const entry = parseFloat(td.dataset.entry);
+                const ltp = data[symbol];
+
+                if (ltp === undefined) return;
+
+                td.innerText = ltp.toFixed(2);
+                td.classList.remove('loss', 'profit');
+
+                if (entry && ltp < entry) {
+                    td.classList.add('loss');
+                } else if (entry && ltp > entry) {
+                    td.classList.add('profit');
+                }
+            });
+
+        } catch (e) {
+            console.error("LTP fetch failed", e);
+        }
+    }
+
+    setInterval(refreshLtp, 1000);
+    refreshLtp();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic and Description Form</title>
+    <link href="/css/main.css" rel="stylesheet">
+</head>
+<body>
+ <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+    <div class="topic-container">
+        <h1>Topic and Description Form</h1>
+
+        <div class="form-group">
+            <label for="topic">Topic:</label>
+            <input type="text" id="topic" name="topic" placeholder="Enter topic">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" placeholder="Enter description"></textarea>
+        </div>
+
+        <button class="btn" onclick="saveData()">Save</button>
+
+      
+    </div>
+
+
+</body>
+</html>

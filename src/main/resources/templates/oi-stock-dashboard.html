@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<title>Stock OI Dashboard</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+	<style>
+		body {
+			margin: 0;
+			font-family: Inter, Arial;
+			background: #f2f4f8;
+		}
+
+		.header {
+			background: #0f172a;
+			color: #fff;
+			padding: 14px 24px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: auto;
+			padding: 20px;
+		}
+
+		select {
+			padding: 6px 10px;
+			border-radius: 8px;
+		}
+
+		.cards {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+			gap: 14px;
+			margin-bottom: 20px;
+		}
+
+		.card {
+			background: #fff;
+			padding: 16px;
+			border-radius: 14px;
+			box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
+		}
+
+		.value {
+			font-size: 26px;
+			font-weight: 800;
+		}
+
+		.support {
+			color: #047857;
+		}
+
+		.resistance {
+			color: #b91c1c;
+		}
+
+		.chart-card {
+			background: #fff;
+			padding: 16px;
+			border-radius: 14px;
+			margin-bottom: 20px;
+		}
+
+		table {
+			width: 100%;
+			background: #fff;
+			border-radius: 14px;
+			border-collapse: collapse;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+		}
+
+		th,
+		td {
+			padding: 10px;
+			text-align: center;
+			border-bottom: 1px solid #eee;
+		}
+
+		th {
+			background: #f3f4f6;
+		}
+
+		tbody tr:hover {
+			background: #f9fafb;
+		}
+
+		.imp-support {
+			background: #ecfdf5 !important;
+		}
+
+		.imp-resistance {
+			background: #fee2e2 !important;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="header">
+		<h2>Stock OI Dashboard</h2>
+		<div>
+			Select Stock:
+			<select id="stockSelect">
+				<option th:each="sym : ${list}" th:value="${sym.symbol}" th:text="${sym.symbol}">
+				</option>
+			</select>
+		</div>
+	</div>
+
+	<div class="container">
+
+		<!-- Important Levels -->
+		<div class="cards">
+			<div class="card">
+				<h4>Important Support</h4>
+				<div id="supportLevel" class="value support">--</div>
+			</div>
+
+			<div class="card">
+				<h4>Important Resistance</h4>
+				<div id="resistanceLevel" class="value resistance">--</div>
+			</div>
+		</div>
+
+		<!-- Chart -->
+		<div class="chart-card">
+			<h4>OI Wall (Calls vs Puts)</h4>
+			<canvas id="oiChart"></canvas>
+		</div>
+
+		<!-- Table -->
+		<table>
+			<thead>
+				<tr>
+					<th>Strike</th>
+					<th>Call OI</th>
+					<th>Put OI</th>
+					<th>Δ Call</th>
+					<th>Δ Put</th>
+				</tr>
+			</thead>
+			<tbody id="rows"></tbody>
+		</table>
+
+	</div>
+
+	<script>
+
+		let oiChart;
+
+		const stockSelect = document.getElementById("stockSelect");
+		const supportLevel = document.getElementById("supportLevel");
+		const resistanceLevel = document.getElementById("resistanceLevel");
+		const rows = document.getElementById("rows");
+
+		stockSelect.addEventListener("change", refresh);
+
+		// Auto-load first stock
+		window.onload = function () {
+			if (stockSelect.value) {
+				refresh();
+			}
+		};
+
+		async function refresh() {
+
+			const currentScroll = window.scrollY;
+
+			const symbol = stockSelect.value;
+			if (!symbol) return;
+
+			try {
+				const res = await fetch(`/api/stock-oi/snapshot?symbol=${symbol}`);
+				const data = await res.json();
+
+				supportLevel.innerText = data.support || "--";
+				resistanceLevel.innerText = data.resistance || "--";
+
+				renderChart(data.strikes || []);
+
+				rows.innerHTML = "";
+
+				(data.strikes || []).forEach(r => {
+
+					const tr = document.createElement("tr");
+
+					if (r.strikePrice === data.support)
+						tr.classList.add("imp-support");
+
+					if (r.strikePrice === data.resistance)
+						tr.classList.add("imp-resistance");
+
+					tr.innerHTML = `
+                <td>${r.strikePrice}</td>
+                <td>${r.callOI}</td>
+                <td>${r.putOI}</td>
+                <td>${r.callChgOI}</td>
+                <td>${r.putChgOI}</td>
+            `;
+
+					rows.appendChild(tr);
+				});
+
+				// Restore scroll position
+				window.scrollTo(0, currentScroll);
+
+			} catch (e) {
+				console.error("Snapshot load failed", e);
+			}
+		}
+
+
+	</script>
+
+</body>
+
+</html>

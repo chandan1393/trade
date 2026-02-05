@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topic List</title>
+    <!-- Add FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Reset default margin and padding */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Layout container */
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #4e54c8, #8f94fb);
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .sidebar a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        /* Main content styling */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        /* Topic list styling */
+        .topic-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Adjust minmax for topic card width */
+            gap: 20px; /* Space between cards */
+        }
+
+        .topic-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .topic-card h3 {
+            margin: 0;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .topic-card p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .topic-card .source {
+            font-style: italic;
+            color: #888;
+        }
+
+        .topic-card .info {
+            font-weight: bold;
+            color: #4e54c8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <h2>Menu</h2>
+        <a href="/dashboard">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="/getProfile">
+            <i class="fas fa-home"></i> Profile
+        </a>
+        <a href="/topics">
+            <i class="fas fa-info-circle"></i> Topic
+        </a>
+        <a href="/contact">
+            <i class="fas fa-envelope"></i> Stretegy
+        </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1>Topic List</h1>
+            <div class="topic-list">
+                <!-- Loop through topics and display them -->
+                <div th:each="topic : ${topics}" class="topic-card">
+                    <h3 th:text="${topic.topicName}">Topic Name</h3>
+                    <p th:text="${topic.description}">Description</p>
+                    <p class="source" th:text="'Source: ' + ${topic.source}">Source</p>
+                    <p class="info" th:text="'Info: ' + ${topic.info}">Info</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+package com.fyers.fyerstrading.repo;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.fyers.fyerstrading.entity.PatternDetection;
+
+public interface PatternDetectionRepository extends JpaRepository<PatternDetection, Long> {
+
+}
