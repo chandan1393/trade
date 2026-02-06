@@ -15,9 +15,7 @@ import com.fyers.fyerstrading.entity.StockDailyPrice;
 import com.fyers.fyerstrading.entity.StockMaster;
 import com.fyers.fyerstrading.model.MasterCandle;
 import com.fyers.fyerstrading.model.ORBResult;
-import com.fyers.fyerstrading.model.SMCBBacktestSummary;
 import com.fyers.fyerstrading.model.TradeResult;
-import com.fyers.fyerstrading.patterns.ImpulseStrengthPatternDetector;
 import com.fyers.fyerstrading.repo.FyersAuthRepository;
 import com.fyers.fyerstrading.repo.StockDailyPriceRepository;
 import com.fyers.fyerstrading.repo.StockMasterRepository;
@@ -26,7 +24,6 @@ import com.fyers.fyerstrading.service.BackTestHourlyStartegy;
 import com.fyers.fyerstrading.service.DailyConsolidationEmaBacktest;
 import com.fyers.fyerstrading.service.LongConsolidatedStockService;
 import com.fyers.fyerstrading.service.LongResistanceBreakoutBacktest;
-import com.fyers.fyerstrading.service.PatternBacktestScanner;
 import com.fyers.fyerstrading.service.ResistanceBreakoutBacktestService;
 import com.fyers.fyerstrading.service.common.CandleFetcher;
 import com.fyers.fyerstrading.strategy.IntradayVWAPBacktest;
@@ -79,11 +76,8 @@ public class BackTestController {
 
 	@Autowired
 	CandleFetcher candleFetcher;
-	@Autowired
-	PatternBacktestScanner scanner;
+
 	
-	@Autowired
-	ImpulseStrengthPatternDetector impulseStrengthPatternDetector;
 	
 	@Autowired
 	StockDailyPriceRepository dailyPrice;
@@ -367,44 +361,8 @@ public class BackTestController {
 	}
 	
 	
-	@GetMapping("/run-all")
-	public ResponseEntity<String> runScanAll() {
-	    // 1. Fetch all stock masters
-	    List<StockMaster> allStocks = masterRepository.findAll();
-	    
-	    if (allStocks.isEmpty()) {
-	        return ResponseEntity.badRequest().body("No stocks found in StockMaster table.");
-	    }
-
-	    // 2. Trigger the asynchronous batch process
-	    scanner.processAllStocksAsync(allStocks);
-
-	    return ResponseEntity.ok("Batch processing started for " + allStocks.size() + " stocks. Check DB for results.");
-	}
 	
 	
-	@GetMapping("/impulseStrengthPatternDetector")
-	public ResponseEntity<String> impulseStrengthPatternDetector() {
-	    // 1. Fetch all stock masters
-	    List<StockMaster> allStocks = masterRepository.findByIsInFnoTrue();
-	    
-	    if (allStocks.isEmpty()) {
-	        return ResponseEntity.badRequest().body("No stocks found in StockMaster table.");
-	    }
 
-	    
-	    for(StockMaster stock:allStocks) {
-	    	
-	    	List<StockDailyPrice> dbPrices = dailyPrice.findAllBWDate(stock.getSymbol(),
-					LocalDate.now().minusYears(2), LocalDate.now());
-	    	
-	    	impulseStrengthPatternDetector.backtestLastOneYear(dbPrices,stock.getSymbol());
-	    	
-	    }
-	    
-	    
-
-	    return ResponseEntity.ok("Batch processing started for " + allStocks.size() + " stocks. Check DB for results.");
-	}
 	
 }
